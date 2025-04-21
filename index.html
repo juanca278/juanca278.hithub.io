@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR-BARBER</title>
+  <!-- Font Awesome para íconos (CDN de Unpkg) -->
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.css">
+  <style>
+    /* General */
+    * { 
+      box-sizing: border-box; 
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #121212;
+      color: #fff;
+    }
+    header {
+      background: #000;
+      padding: 10px;
+      text-align: center;
+      border-bottom: 2px solid #D4AF37;
+    }
+    header img {
+      max-height: 120px; 
+      display: block;
+      margin: 0 auto;
+    }
+    header h1 {
+      margin: 10px 0;
+      color: #D4AF37;
+    }
+    nav {
+      margin-top: 10px; 
+    }
+    nav button {
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      background: #D4AF37;
+      border: none;
+      border-radius: 5px;
+      color: #121212;
+      transition: background 0.3s;
+    }
+    nav button:hover { 
+      background: #b0892c; 
+    }
+    section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+    .hidden { 
+      display: none; 
+    }
+    /* Formularios */
+    form {
+      background: #2c2c2c;
+      padding: 15px;
+      border: 1px solid #D4AF37;
+      border-radius: 5px;
+      max-width: 500px;
+      margin: 0 auto 15px;
+    }
+    form input, form button, form select {
+      width: 100%;
+      padding: 6px;
+      margin: 4px 0;
+      font-size: 14px;
+      border: 1px solid #D4AF37;
+      border-radius: 3px;
+      background: #121212;
+      color: #fff;
+    }
+    fieldset {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #D4AF37;
+      border-radius: 5px;
+    }
+    fieldset legend { padding: 0 5px; }
+    /* Contenedor de horas */
+    .hours-container {
+      margin: 10px 0;
+    }
+    .hours-container button {
+      margin: 5px;
+      padding: 8px;
+      font-size: 12px;
+      width: 80px;
+      border: 1px solid #D4AF37;
+      background: #121212;
+      color: #fff;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+    .hours-container button.selected {
+      background: #D4AF37;
+      color: #121212;
+    }
+    .hours-container button[disabled] {
+      text-decoration: line-through;
+      color: gray;
+    }
+    #btnAcceptAppointment {
+      margin-top: 10px;
+      background: #D4AF37;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 20px;
+      color: #121212;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #btnAcceptAppointment:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    /* Área de Inicio */
+    .home-container {
+      text-align: center;
+      margin-top: 20px;
+      padding: 20px;
+      background: linear-gradient(45deg, #000, #333);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+    .home-container h2 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      color: #D4AF37;
+    }
+    .home-container p {
+      font-size: 1.2em;
+      margin-bottom: 15px;
+    }
+    .contact-info p {
+      margin: 5px 0;
+      font-size: 1em;
+    }
+    .contact-info a {
+      color: #D4AF37;
+      text-decoration: none;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+    .contact-info a:hover { text-decoration: underline; }
+    /* Modal de Edición */
+    #editModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #editModal .modal-content {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+    }
+    #editModal input, 
+    #editModal select, 
+    #editModal button {
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+      font-size: 14px;
+      border: 1px solid #D4AF37;
+      border-radius: 3px;
+      background: #121212;
+      color: #fff;
+    }
+    #editModal fieldset { border: none; padding: 0; }
+    #editModal .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    /* Panel de Administración */
+    #adminContainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+    }
+    .status-group {
+      border: 1px solid #D4AF37;
+      border-radius: 5px;
+      background: #2c2c2c;
+      padding: 15px;
+    }
+    .status-group h3 {
+      margin: 0 0 10px 0;
+      color: #D4AF37;
+      text-align: center;
+    }
+    .appointment {
+      background: #121212;
+      padding: 10px;
+      border: 1px solid #D4AF37;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    .appointment p { margin: 5px 0; }
+    .estatus-proximo { color: yellow; font-weight: bold; }
+    .estatus-pendiente { color: red; font-weight: bold; }
+    .estatus-finalizado { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="imagen.jpg" alt="Logo de AR-BARBER">
+    <h1>AR-BARBER</h1>
+    <nav>
+      <button id="btnHome">Inicio</button>
+      <!-- Botón de Agendar Cita -->
+      <button id="btnClient">Agendar Cita</button>
+      <button id="btnAdmin">Administrador</button>
+    </nav>
+  </header>
+  
+  <!-- Sección de Inicio -->
+  <section id="home">
+    <div class="home-container">
+      <h2>Bienvenido a AR-BARBER</h2>
+      <p>
+        Transforma tu imagen con nuestro toque personal. Con pasión y dedicación te ayudamos a descubrir 
+        tu mejor versión. ¡Vive la experiencia y siente la diferencia en cada corte!
+      </p>
+      <div class="contact-info">
+        <p><strong>Contacto:</strong> Tel: 6688366047 | 6683241804 | Email: info@elestilobarberia.com</p>
+        <p>
+          <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+          <a href="https://wa.me/6688366047" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
+        </p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Sección de Cliente -->
+  <section id="clientSection" class="hidden">
+    <h2>Reservar Cita</h2>
+    <form id="clientForm">
+      <label for="clientName">Nombre Completo:</label>
+      <input type="text" id="clientName" required>
+      
+      <label for="clientDate">Seleccione un día:</label>
+      <input type="date" id="clientDate" required>
+      
+      <label for="cutType">Servicio:</label>
+      <select id="cutType" required>
+        <option value="">--Seleccione un servicio--</option>
+        <option value="corte">Corte de cabello ($120)</option>
+        <option value="barba">Barba ($100)</option>
+        <option value="ceja">Ceja ($30)</option>
+        <option value="marcado">Marcado ($70)</option>
+        <option value="corte_barba">Corte y barba (Combo) ($200)</option>
+        <option value="corte_cera">Corte y cera (Combo) ($220)</option>
+        <option value="barba_aceite">Barba y aceite (Combo) ($220)</option>
+        <option value="corte_barba_aceite">Corte, barba y aceite (Combo) ($320)</option>
+      </select>
+      
+      <fieldset>
+        <legend>Productos disponibles:</legend>
+        <input type="checkbox" id="product1" value="Cera">
+        <label for="product1">Cera ($120)</label><br>
+        <input type="checkbox" id="product2" value="Aceite p/barba">
+        <label for="product2">Aceite p/barba ($150)</label><br>
+        <input type="checkbox" id="product3" value="Monóxidil">
+        <label for="product3">Monóxidil ($300)</label><br>
+        <input type="checkbox" id="product4" value="Shampoo">
+        <label for="product4">Shampoo ($250)</label><br>
+        <input type="checkbox" id="product5" value="Gel c/tinte">
+        <label for="product5">Gel c/tinte ($100)</label><br>
+      </fieldset>
+      
+      <button type="submit">Continuar</button>
+    </form>
+    <div id="hoursSection" class="hidden">
+      <h3>Horas disponibles para <span id="selectedDate"></span>:</h3>
+      <div class="hours-container" id="hoursContainer"></div>
+      <button id="btnAcceptAppointment" disabled>Aceptar cita</button>
+    </div>
+    <div id="clientMessage"></div>
+    <button id="btnClientBack">Volver</button>
+  </section>
+  
+  <!-- Sección de Login del Administrador -->
+  <section id="adminLogin" class="hidden">
+    <h2>Acceso Administrador</h2>
+    <form id="loginForm">
+      <label for="adminUser">Usuario:</label>
+      <input type="text" id="adminUser" required>
+      <label for="adminPass">Contraseña:</label>
+      <input type="password" id="adminPass" required>
+      <button type="submit">Ingresar</button>
+    </form>
+    <div id="loginMessage"></div>
+    <button id="btnAdminBack">Volver</button>
+  </section>
+  
+  <!-- Panel de Administración -->
+  <section id="adminPanel" class="hidden">
+    <h2>Panel de Administración</h2>
+    <div id="adminContainer"></div>
+    <button id="btnFinalizarCorte">Finalizar Corte</button>
+    <div id="totalCorte"></div>
+    <!-- Botones de respaldo y conteo de visitas -->
+    <button id="btnBackup">Guardar en Base de Datos</button>
+    <button id="btnVisitCount">Ver Conteo de Visitas</button>
+    <button id="btnAdminExit">Cerrar sesión</button>
+  </section>
+
+  <!-- Modal para Modificar Cita (solo para el administrador) -->
+  <div id="editModal" class="hidden">
+    <div class="modal-content">
+      <h2>Modificar Cita</h2>
+      <form id="editForm">
+        <label for="editDate">Fecha:</label>
+        <input type="date" id="editDate" required>
+        
+        <label for="editTime">Hora:</label>
+        <select id="editTime" required>
+          <option value="">--Seleccione la hora--</option>
+          <!-- Opciones generadas dinámicamente -->
+        </select>
+        
+        <label for="editCutType">Servicio:</label>
+        <select id="editCutType" required>
+          <option value="">--Seleccione un servicio--</option>
+          <option value="corte">Corte de cabello ($120)</option>
+          <option value="barba">Barba ($100)</option>
+          <option value="ceja">Ceja ($30)</option>
+          <option value="marcado">Marcado ($70)</option>
+          <option value="corte_barba">Corte y barba (Combo) ($200)</option>
+          <option value="corte_cera">Corte y cera (Combo) ($220)</option>
+          <option value="barba_aceite">Barba y aceite (Combo) ($220)</option>
+          <option value="corte_barba_aceite">Corte, barba y aceite (Combo) ($320)</option>
+        </select>
+        
+        <fieldset>
+          <legend>Productos disponibles:</legend>
+          <input type="checkbox" id="editProduct1" value="Cera">
+          <label for="editProduct1">Cera ($120)</label><br>
+          <input type="checkbox" id="editProduct2" value="Aceite p/barba">
+          <label for="editProduct2">Aceite p/barba ($150)</label><br>
+          <input type="checkbox" id="editProduct3" value="Monóxidil">
+          <label for="editProduct3">Monóxidil ($300)</label><br>
+          <input type="checkbox" id="editProduct4" value="Shampoo">
+          <label for="editProduct4">Shampoo ($250)</label><br>
+          <input type="checkbox" id="editProduct5" value="Gel c/tinte">
+          <label for="editProduct5">Gel c/tinte ($100)</label><br>
+        </fieldset>
+        
+        <div class="modal-buttons">
+          <button type="button" id="saveChanges">Guardar cambios</button>
+          <button type="button" id="deleteAppointment" style="background:#FF0000;">Cancelar cita</button>
+        </div>
+        <button type="button" id="closeEditModal" style="margin-top:10px;">Cerrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Precios
+    const servicePrices = {
+      "corte": 120,
+      "barba": 100,
+      "ceja": 30,
+      "marcado": 70,
+      "corte_barba": 200,
+      "corte_cera": 220,
+      "barba_aceite": 220,
+      "corte_barba_aceite": 320
+    };
+    const productPrices = {
+      "Cera": 120,
+      "Aceite p/barba": 150,
+      "Monóxidil": 300,
+      "Shampoo": 250,
+      "Gel c/tinte": 100
+    };
+
+    const appointments = []; // Citas
+    const adminCredentials = { user: "admin", pass: "admin123" };
+
+    let clientData = {};  
+    let selectedHour = null;
+    let currentEditingIndex = null; // Para edición
+
+    // Guardar/cargar en LocalStorage
+    function saveAppointments() {
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+    }
+    function loadAppointments() {
+      const storedAppointments = localStorage.getItem("appointments");
+      if (storedAppointments) {
+        appointments.splice(0, appointments.length, ...JSON.parse(storedAppointments));
+      }
+    }
+    loadAppointments();
+
+    // Migrar citas antiguas a los nuevos estatus
+    function migrateAppointments() {
+      appointments.forEach(app => {
+        if (app.estatus === "Próximo") { 
+          app.estatus = "Próximo corte";
+        } else if (app.estatus === "Pendiente") {
+          app.estatus = "Corte no realizado";
+        } else if (app.estatus === "Finalizado") {
+          app.estatus = "Corte Terminado";
+        }
+      });
+      saveAppointments();
+    }
+    migrateAppointments();
+
+    // Purgar citas "Corte Terminado" viejas (más de 3 días)
+    function purgeOldFinalizedAppointments() {
+      const now = Date.now();
+      const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+      for (let i = appointments.length - 1; i >= 0; i--) {
+        const app = appointments[i];
+        if (app.estatus === "Corte Terminado" && app.finalizedAt) {
+          const finalizedTime = new Date(app.finalizedAt).getTime();
+          if (now - finalizedTime >= threeDaysInMs) {
+            appointments.splice(i, 1);
+          }
+        }
+      }
+      saveAppointments();
+    }
+
+    // Botón para respaldar citas en "Base de Datos" (simulado) con validez de 50 años
+    function backupAppointments() {
+      const now = new Date();
+      const expiration = new Date();
+      expiration.setFullYear(expiration.getFullYear() + 50);
+      const backupData = {
+        appointments: appointments,
+        expiration: expiration.toISOString()
+      };
+      localStorage.setItem("appointments_backup", JSON.stringify(backupData));
+      alert("Citas respaldadas. Se guardarán por 50 años (hasta " + expiration.toLocaleDateString() + ").");
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll("section").forEach(section => section.classList.add("hidden"));
+      document.getElementById(sectionId).classList.remove("hidden");
+    }
+
+    // Navegación
+    document.getElementById("btnHome").addEventListener("click", () => showSection("home"));
+    document.getElementById("btnClient").addEventListener("click", () => {
+      document.getElementById("clientForm").reset();
+      document.getElementById("clientMessage").textContent = "";
+      document.getElementById("hoursSection").classList.add("hidden");
+      selectedHour = null;
+      showSection("clientSection");
+    });
+    document.getElementById("btnClientBack").addEventListener("click", () => showSection("home"));
+    document.getElementById("btnAdmin").addEventListener("click", () => showSection("adminLogin"));
+    document.getElementById("btnAdminBack").addEventListener("click", () => showSection("home"));
+
+    // Formulario de cliente
+    document.getElementById("clientForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("clientName").value;
+      const date = document.getElementById("clientDate").value;
+      const cutType = document.getElementById("cutType").value;
+      const selectedProducts = Array.from(document.querySelectorAll("#clientForm input[type=checkbox]:checked"))
+                                  .map(product => product.value);
+
+      if (!date) {
+        document.getElementById("clientMessage").textContent = "Debe seleccionar una fecha.";
+        return;
+      }
+      if (!cutType) {
+        document.getElementById("clientMessage").textContent = "Debe seleccionar el servicio.";
+        return;
+      }
+      clientData = { name, date, selectedProducts, cutType };
+      document.getElementById("selectedDate").textContent = date;
+      document.getElementById("hoursSection").classList.remove("hidden");
+      renderAvailableHours(date);
+      document.getElementById("btnAcceptAppointment").disabled = true;
+    });
+
+    // Mostrar horas disponibles en reserva
+    function renderAvailableHours(date) {
+      const hoursContainer = document.getElementById("hoursContainer");
+      hoursContainer.innerHTML = "";
+      selectedHour = null;
+      const hours = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      const todayStr = new Date().toISOString().split("T")[0];
+      hours.forEach(hour => {
+        const isBooked = appointments.some(app => app.date === date && app.time === hour);
+        const button = document.createElement("button");
+        button.textContent = hour;
+        if (isBooked) {
+          button.disabled = true;
+          button.style.textDecoration = "line-through";
+          button.style.color = "gray";
+        } else if (date === todayStr && new Date() > new Date(date + "T" + hour)) {
+          button.disabled = true;
+          button.style.textDecoration = "line-through";
+          button.style.color = "gray";
+        } else {
+          button.addEventListener("click", function() {
+            const btns = hoursContainer.querySelectorAll("button");
+            btns.forEach(btn => btn.classList.remove("selected"));
+            this.classList.add("selected");
+            selectedHour = hour;
+            document.getElementById("btnAcceptAppointment").disabled = false;
+          });
+        }
+        hoursContainer.appendChild(button);
+      });
+    }
+
+    document.getElementById("btnAcceptAppointment").addEventListener("click", function() {
+      if (!selectedHour) return;
+      reserveHour(clientData.name, clientData.date, selectedHour, clientData.selectedProducts, clientData.cutType);
+      document.getElementById("clientForm").reset();
+      clientData = {};
+      selectedHour = null;
+    });
+
+    // Al reservar se asigna "Próximo corte"
+    function reserveHour(name, date, hour, products, cutType) {
+      let price = servicePrices[cutType] || 0;
+      products.forEach(product => { price += productPrices[product] || 0; });
+      appointments.push({ 
+        name, 
+        date, 
+        time: hour, 
+        products, 
+        cutType, 
+        monto: price, 
+        estatus: "Próximo corte" 
+      });
+      saveAppointments();
+      document.getElementById("clientMessage").textContent =
+        `Cita reservada para el ${date} a las ${hour}. Servicio: ${cutType}. Productos: ${products.join(", ") || "Ninguno"}. Precio: $${price}.`;
+      renderAvailableHours(date);
+      setTimeout(() => { showSection("home"); }, 2000);
+    }
+
+    // Login Administrador
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const user = document.getElementById("adminUser").value;
+      const pass = document.getElementById("adminPass").value;
+      if (user === adminCredentials.user && pass === adminCredentials.pass) {
+        showSection("adminPanel");
+        renderAdminPanel();
+      } else {
+        document.getElementById("loginMessage").textContent = "Usuario o contraseña incorrectos.";
+      }
+    });
+
+    document.getElementById("btnAdminExit").addEventListener("click", () => {
+      document.getElementById("adminUser").value = "";
+      document.getElementById("adminPass").value = "";
+      document.getElementById("loginMessage").textContent = "";
+      showSection("home");
+    });
+
+    // Crear elemento HTML para cada cita en el panel de administración (sin mostrar estatus)
+    function createAppointmentElement(app, index) {
+      let estClass = "";
+      if (app.estatus === "Próximo corte") { 
+        estClass = "estatus-proximo"; 
+      } else if (app.estatus === "Corte no realizado") { 
+        estClass = "estatus-pendiente"; 
+      } else if (app.estatus === "Corte Terminado") { 
+        estClass = "estatus-finalizado"; 
+      }
+      const container = document.createElement("div");
+      container.classList.add("appointment");
+      container.innerHTML = `
+        <p><strong>Nombre:</strong> ${app.name}</p>
+        <p><strong>Fecha:</strong> ${app.date}</p>
+        <p><strong>Hora:</strong> ${app.time}</p>
+        <p><strong>Servicio:</strong> ${app.cutType || "Sin especificar"}</p>
+        <p><strong>Productos:</strong> ${(app.products && app.products.length > 0) ? app.products.join(", ") : "Ninguno"}</p>
+        <p><strong>Ingreso:</strong> $${app.monto} 
+          <input type="number" value="${app.monto}" data-index="${index}" style="width:75px; background:#121212; color:#fff; border:1px solid #D4AF37;">
+        </p>
+        <p><strong>Estatus:</strong> <span class="${estClass}">${app.estatus}</span></p>
+        <div>
+          <button class="btnTerminado" data-index="${index}" style="background:#D4AF37; border:none; padding:5px 10px; border-radius:3px; color:#121212;">Terminar corte</button>
+          <button class="btnModificar" data-index="${index}" style="background:#D4AF37; border:none; padding:5px 10px; border-radius:3px; color:#121212; margin-left:5px;">Modificar cita</button>
+        </div>
+      `;
+      return container;
+    }
+
+    // Renderizar panel de administración agrupando por estatus
+    function renderAdminPanel() {
+      purgeOldFinalizedAppointments();
+      const adminContainer = document.getElementById("adminContainer");
+      adminContainer.innerHTML = "";
+      const now = new Date();
+
+      const groupProximo = document.createElement("div");
+      groupProximo.className = "status-group";
+      groupProximo.innerHTML = "<h3>Próximo corte</h3>";
+      
+      const groupPendiente = document.createElement("div");
+      groupPendiente.className = "status-group";
+      groupPendiente.innerHTML = "<h3>Corte no realizado</h3>";
+      
+      const groupFinalizado = document.createElement("div");
+      groupFinalizado.className = "status-group";
+      groupFinalizado.innerHTML = "<h3>Corte Terminado</h3>";
+
+      appointments.forEach((app, index) => {
+        const appDateTime = new Date(app.date + "T" + app.time);
+        if (app.estatus === "Próximo corte" && appDateTime < now) {
+          app.estatus = "Corte no realizado";
+        }
+        const appointmentElement = createAppointmentElement(app, index);
+        if (app.estatus === "Próximo corte") {
+          groupProximo.appendChild(appointmentElement);
+        } else if (app.estatus === "Corte no realizado") {
+          groupPendiente.appendChild(appointmentElement);
+        } else if (app.estatus === "Corte Terminado") {
+          groupFinalizado.appendChild(appointmentElement);
+        }
+      });
+      
+      if (groupProximo.children.length <= 1) {
+        const msg = document.createElement("p");
+        msg.textContent = "No hay citas próximas.";
+        groupProximo.appendChild(msg);
+      }
+      if (groupPendiente.children.length <= 1) {
+        const msg = document.createElement("p");
+        msg.textContent = "No hay citas pendientes.";
+        groupPendiente.appendChild(msg);
+      }
+      if (groupFinalizado.children.length <= 1) {
+        const msg = document.createElement("p");
+        msg.textContent = "No hay citas terminadas.";
+        groupFinalizado.appendChild(msg);
+      }
+      
+      adminContainer.appendChild(groupProximo);
+      adminContainer.appendChild(groupPendiente);
+      adminContainer.appendChild(groupFinalizado);
+
+      document.querySelectorAll(".btnTerminado").forEach(button => {
+        button.addEventListener("click", function() {
+          const idx = this.getAttribute("data-index");
+          appointments[idx].estatus = "Corte Terminado";
+          appointments[idx].finalizedAt = new Date().toISOString();
+          saveAppointments();
+          alert("Cita marcada como Corte Terminado. Se borrará automáticamente en 3 días.");
+          renderAdminPanel();
+        });
+      });
+      document.querySelectorAll(".btnModificar").forEach(button => {
+        button.addEventListener("click", function() {
+          const idx = this.getAttribute("data-index");
+          if (idx !== null) {
+            currentEditingIndex = idx;
+            openEditModal(parseInt(idx, 10));
+          }
+        });
+      });
+    }
+
+    // Actualizar opciones de hora en el modal según disponibilidad
+    function updateEditTimeOptions(selectedDate, currentTimeSelection) {
+      const editTimeSelect = document.getElementById("editTime");
+      editTimeSelect.innerHTML = "";
+      const hours = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      const todayStr = new Date().toISOString().split("T")[0];
+      hours.forEach(hour => {
+        let isBooked = appointments.some((app, index) => {
+          if(index == currentEditingIndex) return false;
+          return app.date === selectedDate && app.time === hour;
+        });
+        let isPast = false;
+        if(selectedDate === todayStr && new Date() > new Date(selectedDate + "T" + hour)) {
+          isPast = true;
+        }
+        const option = document.createElement("option");
+        option.value = hour;
+        if ((isBooked || isPast) && currentTimeSelection !== hour) {
+          option.disabled = true;
+          option.textContent = "❌ " + hour;
+        } else {
+          option.textContent = hour;
+        }
+        editTimeSelect.appendChild(option);
+      });
+    }
+
+    // Abrir modal de edición y precargar información
+    function openEditModal(index) {
+      const app = appointments[index];
+      document.getElementById("editDate").value = app.date;
+      updateEditTimeOptions(app.date, app.time);
+      document.getElementById("editTime").value = app.time;
+      document.getElementById("editCutType").value = app.cutType;
+      
+      // Reiniciar checkboxes de productos
+      const productCheckboxIds = ["editProduct1", "editProduct2", "editProduct3", "editProduct4", "editProduct5"];
+      productCheckboxIds.forEach(id => {
+        document.getElementById(id).checked = false;
+      });
+      if (app.products && app.products.length > 0) {
+        app.products.forEach(prod => {
+          const checkboxes = document.querySelectorAll("#editModal input[type='checkbox']");
+          checkboxes.forEach(cb => {
+            if (cb.value === prod) {
+              cb.checked = true;
+            }
+          });
+        });
+      }
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    document.getElementById("editDate").addEventListener("change", function() {
+      updateEditTimeOptions(this.value, null);
+    });
+
+    document.getElementById("saveChanges").addEventListener("click", function() {
+      const newDate = document.getElementById("editDate").value;
+      const newTime = document.getElementById("editTime").value;
+      const newCutType = document.getElementById("editCutType").value;
+      const newProducts = [];
+      const checkboxes = document.querySelectorAll("#editModal input[type='checkbox']");
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          newProducts.push(cb.value);
+        }
+      });
+      if (!newDate || !newTime || !newCutType) {
+        alert("Por favor llene todos los campos requeridos.");
+        return;
+      }
+      let newPrice = servicePrices[newCutType] || 0;
+      newProducts.forEach(product => {
+        newPrice += productPrices[product] || 0;
+      });
+      
+      const idx = currentEditingIndex;
+      if (idx !== null) {
+        appointments[idx].date = newDate;
+        appointments[idx].time = newTime;
+        appointments[idx].cutType = newCutType;
+        appointments[idx].products = newProducts;
+        appointments[idx].monto = newPrice;
+        appointments[idx].estatus = "Próximo corte";
+        saveAppointments();
+        renderAdminPanel();
+        closeEditModal();
+        alert("Cita modificada correctamente.");
+      }
+    });
+
+    document.getElementById("deleteAppointment").addEventListener("click", function() {
+      const idx = currentEditingIndex;
+      if (idx !== null) {
+        if (confirm("¿Estás seguro de que deseas cancelar la cita?")) {
+          appointments.splice(idx, 1);
+          saveAppointments();
+          renderAdminPanel();
+          closeEditModal();
+          alert("Cita cancelada.");
+        }
+      }
+    });
+
+    document.getElementById("closeEditModal").addEventListener("click", function() {
+      closeEditModal();
+    });
+
+    // Finalizar corte: suma ingresos del día actual
+    document.getElementById("btnFinalizarCorte").addEventListener("click", function() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0];
+      const total = appointments
+                      .filter(app => app.date === todayStr)
+                      .reduce((sum, app) => sum + (app.monto || 0), 0);
+      const endOfDay = new Date(todayStr + "T23:59:59");
+      let statusMessage = now < endOfDay ? "(hasta el momento)" : "(final)";
+      document.getElementById("totalCorte").textContent = "Total Corte (hoy): $" + total + " " + statusMessage;
+    });
+
+    // Listener para respaldo a 50 años (abre respaldo en LocalStorage)
+    document.getElementById("btnBackup").addEventListener("click", backupAppointments);
+    function backupAppointments() {
+      const now = new Date();
+      const expiration = new Date();
+      expiration.setFullYear(expiration.getFullYear() + 50);
+      const backupData = {
+        appointments: appointments,
+        expiration: expiration.toISOString()
+      };
+      localStorage.setItem("appointments_backup", JSON.stringify(backupData));
+      alert("Citas respaldadas. Se guardarán por 50 años (hasta " + expiration.toLocaleDateString() + ").");
+    }
+
+    // Nuevo botón: Ver Conteo de Visitas. Abre nueva pestaña con listado sin estatus.
+    document.getElementById("btnVisitCount").addEventListener("click", function() {
+      // Agregamos un conteo por nombre, sin mostrar el estatus
+      const counts = {};
+      appointments.forEach(app => {
+        if(counts[app.name]) {
+          counts[app.name]++;
+        } else {
+          counts[app.name] = 1;
+        }
+      });
+      let html = "<html><head><title>Conteo de Visitas</title>";
+      html += "<style>body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #D4AF37; padding: 10px; text-align: left; } th { background: #000; color: #D4AF37; } </style>";
+      html += "</head><body>";
+      html += "<h1>Conteo de Visitas a la Barbería</h1>";
+      html += "<table><tr><th>Nombre</th><th>Cantidad de citas</th></tr>";
+      for (let name in counts) {
+         html += `<tr><td>${name}</td><td>${counts[name]}</td></tr>`;
+      }
+      html += "</table>";
+      html += "</body></html>";
+      const newWindow = window.open("", "_blank");
+      newWindow.document.write(html);
+      newWindow.document.close();
+    });
+  </script>
+</body>
+</html>
